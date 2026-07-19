@@ -15,6 +15,10 @@ next_id = 4
 class TaskCreate(BaseModel):
     title: str = ""
 
+class TaskUpdate(BaseModel):
+    title: str = ""
+    done: bool = False
+
 @app.exception_handler(HTTPException)
 def custom_http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
@@ -55,3 +59,24 @@ def create_task(task: TaskCreate):
     tasks.append(new_task)
     next_id += 1
     return new_task
+
+@app.put("/tasks/{task_id}", summary="Update a task")
+def update_task(task_id: int, update: TaskUpdate):
+    """Replaces a task's title and done status. 404 if not found, 400 if title is empty."""
+    if not update.title or not update.title.strip():
+        raise HTTPException(status_code=400, detail="Title is required")
+    for task in tasks:
+        if task["id"] == task_id:
+            task["title"] = update.title
+            task["done"] = update.done
+            return task
+    raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+
+@app.delete("/tasks/{task_id}", status_code=204, summary="Delete a task")
+def delete_task(task_id: int):
+    """Removes a task by id. 404 if it doesn't exist."""
+    for i, task in enumerate(tasks):
+        if task["id"] == task_id:
+            tasks.pop(i)
+            return
+    raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
