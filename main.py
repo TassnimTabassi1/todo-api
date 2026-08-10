@@ -116,3 +116,45 @@ def create_task(task: TaskCreate):
     conn.close()
 
     return {"id": new_id, "title": task.title, "done": False}
+@app.put("/tasks/{task_id}", summary="Update a task")
+def update_task(task_id: int, update: TaskUpdate):
+    """Replaces a task's title and done status. 404 if not found, 400 if title is empty."""
+    if not update.title or not update.title.strip():
+        raise HTTPException(status_code=400, detail="Title is required")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    existing = cursor.fetchone()
+
+    if existing is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    cursor.execute(
+        "UPDATE tasks SET title = ?, done = ? WHERE id = ?",
+        (update.title, update.done, task_id)
+    )
+    conn.commit()
+    conn.close()
+
+    return {"id": task_id, "title": update.title, "done": update.done}
+
+
+@app.delete("/tasks/{task_id}", status_code=204, summary="Delete a task")
+def delete_task(task_id: int):
+    """Removes a task by id. 404 if it doesn't exist."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    existing = cursor.fetchone()
+
+    if existing is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
+    conn.close()
