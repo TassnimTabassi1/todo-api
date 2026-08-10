@@ -4,6 +4,10 @@ from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 from pydantic import BaseModel
 
+# Stage 4 note: explored the database manually in DB Browser for SQLite —
+# ran SELECT, WHERE, COUNT(*), UPDATE, and DELETE queries by hand and confirmed
+# the API reflects changes made directly to tasks.db, with no restart needed.
+
 app = FastAPI(title="Task API", description="A small CRUD API for managing a to-do list.")
 
 DB_FILE = "tasks.db"
