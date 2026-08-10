@@ -74,3 +74,28 @@ def read_root():
 def health_check():
     """Confirms the server is running."""
     return {"status": "ok"}
+    
+@app.get("/tasks", summary="List all tasks")
+def get_tasks():
+    """Returns every task currently stored in the database."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+@app.get("/tasks/{task_id}", summary="Get one task")
+def get_task(task_id: int):
+    """Returns a single task by id, or 404 if it doesn't exist."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    return dict(row)
