@@ -99,3 +99,20 @@ def get_task(task_id: int):
         raise HTTPException(status_code=404, detail="Task not found")
 
     return dict(row)
+@app.post("/tasks", status_code=201, summary="Create a task")
+def create_task(task: TaskCreate):
+    """Creates a new task. Title is required and cannot be empty."""
+    if not task.title or not task.title.strip():
+        raise HTTPException(status_code=400, detail="Title is required")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (task.title, False)
+    )
+    conn.commit()
+    new_id = cursor.lastrowid
+    conn.close()
+
+    return {"id": new_id, "title": task.title, "done": False}
