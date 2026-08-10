@@ -66,6 +66,28 @@ Interactive API docs are available at `http://localhost:8000/docs`, auto-generat
 
 ![Swagger UI showing all endpoints](./swagger-screenshot.png)
 
+## Database (SQLite)
+
+This project now stores tasks in a real SQLite database instead of an in-memory list, as part of Week 3 of the internship.
+
+**Why SQLite?** It requires no separate server or installation — the entire database is a single file. That makes it perfect for a small project like this: zero setup, and the data survives every server restart.
+
+**Where the database lives:** `tasks.db`, created automatically the first time the server starts. It's excluded from Git (`.gitignore`) so every fresh clone starts with a clean database — the app creates the table and seeds 3 example tasks automatically on first run.
+
+### Example SQL query
+
+Run directly in DB Browser for SQLite, on the "Execute SQL" tab:
+
+```sql
+SELECT COUNT(*) FROM tasks;
+```
+
+This returned `4` — the total number of tasks stored at that moment, counted directly by the database instead of in Python code.
+
+### Database viewer screenshot
+
+![Tasks table in DB Browser for SQLite](./db-browser-screenshot.png)
+
 ## Notes
 
 - All data is in-memory only — restarting the server resets the task list back to the 3 seed tasks.
